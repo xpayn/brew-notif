@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+init () {
+    set -o errexit
+    set -o nounset
+    set -o pipefail
+    set -o xtrace
+}
+
+notify () {
+    local txt="$1" title="${2:-}"
+    if [[ ! -z "$title" ]]; then
+        osascript -e "display notification \"${txt}\" with title \"${title}\""
+    else
+        osascript -e "display notification \"${txt}\""
+    fi
+}
+
+main() {
+    init
+    brew update &>/dev/null
+    local brew_outdated=$(brew outdated) cask_outdated=$(brew cask outdated)
+    if [[ ! -z "$brew_outdated" ]]; then
+        notify "Outdated recipes:\n${brew_outdated}" "Homebrew"
+    fi
+    if [[ ! -z "$cask_outdated" ]]; then
+        notify "Outdated casks:\n${cask_outdated}" "Homebrew"
+    fi
+}
+
+main
